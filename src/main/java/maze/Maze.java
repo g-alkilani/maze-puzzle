@@ -30,24 +30,39 @@ public class Maze {
 
     public void start() {
         panel.add(createMaze());
+        panel.add(createNewGameButton());
         frame.add(panel);
         frame.setVisible(true);
     }
 
+    public void startNewGame() {
+        frame.setVisible(false);
+        panel.removeAll();
+        prepareField();
+        panel.add(createMaze());
+        panel.add(createNewGameButton());
+        panel.revalidate();
+        panel.repaint();
+        frame.setVisible(true);
+    }
+
     void handleAction(int action) {
+        if (currentRow == width - 1 && currentColumn == length - 1) {
+            return;
+        }
         Cell currentPosition = cells[currentRow][currentColumn];
+        Cell neighbour = null;
         switch (action) {
             case KeyEvent.VK_LEFT: {
                 if (!currentPosition.isHasWallLeft()) {
-                    Cell neighbour = cells[currentRow][currentColumn - 1];
-                    swapCells(currentPosition, neighbour);
+                    neighbour = cells[currentRow][currentColumn - 1];
                     currentColumn--;
                 }
                 break;
             }
             case KeyEvent.VK_RIGHT: {
                 if (!currentPosition.isHasWallRight()) {
-                    Cell neighbour = cells[currentRow][currentColumn + 1];
+                    neighbour = cells[currentRow][currentColumn + 1];
                     swapCells(currentPosition, neighbour);
                     currentColumn++;
                 }
@@ -55,7 +70,7 @@ public class Maze {
             }
             case KeyEvent.VK_UP: {
                 if (!currentPosition.isHasWallAbove()) {
-                    Cell neighbour = cells[currentRow - 1][currentColumn];
+                    neighbour = cells[currentRow - 1][currentColumn];
                     swapCells(currentPosition, neighbour);
                     currentRow--;
                 }
@@ -63,13 +78,17 @@ public class Maze {
             }
             case KeyEvent.VK_DOWN: {
                 if (!currentPosition.isHasWallBelow()) {
-                    Cell neighbour = cells[currentRow + 1][currentColumn];
+                    neighbour = cells[currentRow + 1][currentColumn];
                     swapCells(currentPosition, neighbour);
                     currentRow++;
                 }
                 break;
             }
         }
+        if (neighbour == null) {
+            return;
+        }
+        swapCells(currentPosition, neighbour);
     }
 
     private void prepareField() {
@@ -88,6 +107,8 @@ public class Maze {
         surroundCellsWithWalls(cells);
         setBorderWalls(cells);
         cells[0][0].setCurrentPosition(true);
+        currentRow = 0;
+        currentColumn = 0;
     }
 
     private void arrangeWalls() {
@@ -203,6 +224,13 @@ public class Maze {
         neighbour.setCurrentPosition(true);
         neighbour.revalidate();
         neighbour.repaint();
+    }
+
+    private Component createNewGameButton() {
+        JButton jButton = new JButton("New game");
+        jButton.setBounds(650, 600, 100, 30);
+        jButton.addMouseListener(new NewGameButtonListener(this));
+        return jButton;
     }
 
 }
